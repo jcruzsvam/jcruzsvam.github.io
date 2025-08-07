@@ -1,65 +1,30 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Notificaciones Push - OneSignalklll</title>
+OneSignal.push(function () {
+  OneSignal.init({
+    appId: "4e28e2bf-93dc-418e-9a5e-df9522cf894e",
+    serviceWorkerPath: "OneSignalSDKWorker.js",
+    serviceWorkerUpdaterPath: "OneSignalSDKUpdaterWorker.js",
+    notifyButton: {
+      enable: false, // Desactiva el botón flotante de OneSignal
+    },
+  });
 
-  <!-- SDK de OneSignal -->
-  <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async></script>
-</head>
-<body>
-  <h1>Bienvenido a mi prueba de OneSignalll</h1>
-  <p>Este sitio usa notificaciones push.</p>
+  // Detectar si no está suscrito y mostrar automáticamente el permiso
+  OneSignal.isPushNotificationsEnabled().then(function (isEnabled) {
+    if (!isEnabled) {
+      console.log("🔔 Usuario no está suscrito. Mostrando solicitud de permiso...");
 
-  <script>
-    window.OneSignal = window.OneSignal || [];
-
-    OneSignal.push(function () {
-      OneSignal.init({
-        appId: "4e28e2bf-93dc-418e-9a5e-df9522cf894e",
-        serviceWorkerPath: "OneSignalSDKWorker.js",
-        serviceWorkerUpdaterPath: "OneSignalSDKUpdaterWorker.js",
-        notifyButton: {
-          enable: true,
-        },
+      // Esto lanza el prompt del navegador
+      OneSignal.registerForPushNotifications({
+        modalPrompt: true // Muestra el prompt en un modal
       });
+    }
+  });
 
-      // Enviar mensaje a WinForms cuando el usuario se suscriba
-      OneSignal.on('subscriptionChange', function (isSubscribed) {
-        if (isSubscribed && window.chrome?.webview?.postMessage) {
-          window.chrome.webview.postMessage(JSON.stringify({
-            titulo: "Suscripción exitosa 🎉",
-            contenido: "¡Ya estás suscrito a las notificaciones push!"
-          }));
-        }
-      });
+  OneSignal.getUserId().then(function (userId) {
+    console.log("User ID:", userId);
+  });
 
-      // Enviar mensaje a WinForms cuando se muestre una notificación
-      OneSignal.on('notificationDisplay', function (event) {
-        if (window.chrome?.webview?.postMessage) {
-          window.chrome.webview.postMessage(JSON.stringify({
-            titulo: event.heading || "Notificación",
-            contenido: event.content || "Has recibido una nueva notificación"
-          }));
-        }
-      });
-
-      // Solo para depurar (opcional)
-      OneSignal.getUserId().then(function (userId) {
-        console.log("User ID:", userId);
-      });
-
-      OneSignal.on('notificationDisplay', function(event) {
-  console.log("✅ Notificación mostrada");
-  console.log(event);
+  OneSignal.on('subscriptionChange', function (isSubscribed) {
+    console.log("🔄 Suscripción cambió:", isSubscribed);
+  });
 });
-
-
-      OneSignal.isPushNotificationsEnabled().then(function (isEnabled) {
-        console.log("Push notifications enabled?", isEnabled);
-      });
-    });
-  </script>
-</body>
-</html>
