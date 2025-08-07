@@ -50,6 +50,12 @@
         console.log("User ID:", userId);
       });
 
+      OneSignal.on('notificationDisplay', function(event) {
+  console.log("✅ Notificación mostrada");
+  console.log(event);
+});
+
+
       OneSignal.isPushNotificationsEnabled().then(function (isEnabled) {
         console.log("Push notifications enabled?", isEnabled);
       });
