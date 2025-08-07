@@ -5,19 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Notificaciones Push - OneSignal</title>
 
-  <!-- ✅ SDK de OneSignal (solo una vez) -->
+  <!-- SDK de OneSignal -->
   <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async></script>
 </head>
 <body>
   <h1>Bienvenido a mi prueba de OneSignalllll</h1>
   <p>Este sitio usa notificaciones push.</p>
 
-  <!-- ✅ Script personalizado -->
   <script>
     window.OneSignal = window.OneSignal || [];
+
     OneSignal.push(function () {
       OneSignal.init({
-        appId: "4e28e2bf-93dc-418e-9a5e-df9522cf894e", // ← pon tu App ID real aquí
+        appId: "4e28e2bf-93dc-418e-9a5e-df9522cf894e",
         serviceWorkerPath: "OneSignalSDKWorker.js",
         serviceWorkerUpdaterPath: "OneSignalSDKUpdaterWorker.js",
         notifyButton: {
@@ -25,12 +25,31 @@
         },
       });
 
-      // Obtener ID del usuario
+      // Enviar mensaje a WinForms cuando el usuario se suscriba
+      OneSignal.on('subscriptionChange', function (isSubscribed) {
+        if (isSubscribed && window.chrome?.webview?.postMessage) {
+          window.chrome.webview.postMessage(JSON.stringify({
+            titulo: "Suscripción exitosa 🎉",
+            contenido: "¡Ya estás suscrito a las notificaciones push!"
+          }));
+        }
+      });
+
+      // Enviar mensaje a WinForms cuando se muestre una notificación
+      OneSignal.on('notificationDisplay', function (event) {
+        if (window.chrome?.webview?.postMessage) {
+          window.chrome.webview.postMessage(JSON.stringify({
+            titulo: event.heading || "Notificación",
+            contenido: event.content || "Has recibido una nueva notificación"
+          }));
+        }
+      });
+
+      // Solo para depurar (opcional)
       OneSignal.getUserId().then(function (userId) {
         console.log("User ID:", userId);
       });
 
-      // Verificar si está suscrito
       OneSignal.isPushNotificationsEnabled().then(function (isEnabled) {
         console.log("Push notifications enabled?", isEnabled);
       });
